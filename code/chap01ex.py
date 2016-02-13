@@ -13,8 +13,35 @@ import sys
 import nsfg
 import thinkstats2
 
+def ReadFemResp(dct_file='2002FemResp.dct',
+                dat_file='2002FemResp.dat.gz'):
+    """Reads the NSFG pregnancy data.
+
+    dct_file: string file name
+    dat_file: string file name
+
+    returns: DataFrame
+    """
+    dct = thinkstats2.ReadStataDct(dct_file)
+    df = dct.ReadFixedWidth(dat_file, compression='gzip')
+    return df
 
 def main(script):
+    df = ReadFemResp()
+    print(df.shape)
+    t = df.pregnum.value_counts().sort_index()
+    print(t)
+    print("7-95:", t[7:96].sum())
+    preg = nsfg.ReadFemPreg()
+    preg_map = nsfg.MakePregMap(preg)
+    # set caseid as index
+    df.set_index("caseid", inplace=True)
+    for caseid, indics in preg_map.items():
+        n = len(indics)
+        pregnum = df.pregnum[caseid]
+        assert pregnum == n
+
+
     """Tests the functions in this module.
 
     script: string script name
